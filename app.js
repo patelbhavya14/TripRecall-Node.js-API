@@ -14,5 +14,6 @@ app.use(cors());
 // Define Routes
 app.use("/", require("./routes/user"));
 app.use("/", require("./routes/trip"));
+app.use("/", require("./routes/wishlist"));
 
 module.exports = app;
