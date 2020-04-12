@@ -106,4 +106,23 @@ router.get("/v1/trip/:id", auth, async (req, res) => {
   }
 });
 
+// @route    DELETE /v1/trip/:id
+// @desc     Delete trip
+// @access   Private
+router.delete("/v1/trip/:id", auth, async (req, res) => {
+  try {
+    let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
+
+    if (!trip) {
+      return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+    }
+
+    await trip.remove();
+
+    return res.status(200).json();
+  } catch (err) {
+    return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+  }
+});
+
 module.exports = router;
