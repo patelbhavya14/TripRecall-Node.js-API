@@ -1,6 +1,6 @@
 const app = require("../app");
 const request = require("supertest");
-
+let token = "";
 describe("Sample Test", () => {
   test("Create a User should return 201", async (done) => {
     let body = {

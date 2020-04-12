@@ -130,7 +130,7 @@ router.post(
 
 // @route    GET /v1/user/self
 // @desc     Get User
-// @access   Public
+// @access   Private
 router.get("/v1/user/self", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -143,12 +143,12 @@ router.get("/v1/user/self", auth, async (req, res) => {
 
 // @route    PUT /v1/user
 // @desc     Update User
-// @access   Public
+// @access   Private
 router.put(
   "/v1/user",
+  auth,
   [
-    check("name", "Name is required").not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
+    check("username", "Name is required").not().isEmpty(),
     check(
       "password",
       "Please enter a password with 6 or more characters"
@@ -160,15 +160,15 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { email, username } = req.body;
+    const { username } = req.body;
 
     try {
-      let user = await User.findOne({ email });
+      let user = await User.findById(req.user.id);
 
       if (!user) {
         return res
           .status(400)
-          .json({ errors: [{ msg: "User already exists" }] });
+          .json({ errors: [{ msg: "User does not exists" }] });
       }
 
       user.username = username;
