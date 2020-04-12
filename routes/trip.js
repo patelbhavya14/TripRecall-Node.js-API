@@ -72,9 +72,21 @@ router.post(
       return res.status(200).json(trip);
     } catch (err) {
       console.log(err);
-      return res.status(400).json({ msg: "Bad Request" });
+      return res.status(400).json({ errors: [{ msg: "Bad request" }] });
     }
   }
 );
+
+// @route    GET /v1/trips
+// @desc     Get all trips
+// @access   Private
+router.get("/v1/trips", auth, async (req, res) => {
+  try {
+    let trips = await Trip.find({ user: req.user.id });
+    return res.status(200).json(trips);
+  } catch (err) {
+    return res.status(400).json({ errors: [{ msg: "Bad request" }] });
+  }
+});
 
 module.exports = router;
