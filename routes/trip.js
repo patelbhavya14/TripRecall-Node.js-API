@@ -89,4 +89,21 @@ router.get("/v1/trips", auth, async (req, res) => {
   }
 });
 
+// @route    GET /v1/trip/:id
+// @desc     Get trip
+// @access   Private
+router.get("/v1/trip/:id", auth, async (req, res) => {
+  try {
+    let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
+
+    if (!trip) {
+      return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+    }
+
+    return res.status(200).json(trip);
+  } catch (err) {
+    return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+  }
+});
+
 module.exports = router;

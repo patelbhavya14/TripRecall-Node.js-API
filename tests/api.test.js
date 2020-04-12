@@ -53,4 +53,12 @@ describe("Sample Test", () => {
     expect(response.statusCode).toBe(200);
     done();
   });
+
+  test("Get a trip should return 404 when id is invalid", async (done) => {
+    const response = await request(app)
+      .get("/v1/trip/abc")
+      .set("Authorization", token);
+    expect(response.statusCode).toBe(404);
+    done();
+  });
 });
