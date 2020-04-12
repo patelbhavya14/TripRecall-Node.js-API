@@ -13,5 +13,6 @@ app.use(cors());
 
 // Define Routes
 app.use("/", require("./routes/user"));
+app.use("/", require("./routes/trip"));
 
 module.exports = app;
