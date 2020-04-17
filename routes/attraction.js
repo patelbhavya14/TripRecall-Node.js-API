@@ -44,7 +44,16 @@ router.post(
       });
 
       await attraction.save();
-    } catch (err) {}
+
+      trip.attractions.push(attraction);
+      await trip.save();
+
+      return res.status(200).json();
+    } catch (err) {
+      return res
+        .status(404)
+        .json({ errors: [{ msg: "Attraction could not be added" }] });
+    }
   }
 );
 
