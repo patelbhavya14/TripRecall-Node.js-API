@@ -133,7 +133,10 @@ router.post(
 // @access   Private
 router.get("/v1/user/self", auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await (await User.findById(req.user.id).select("-password"))
+      .populate("wishlists")
+      .execPopulate();
+
     res.json(user);
   } catch (err) {
     console.error(err.message);

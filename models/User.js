@@ -18,6 +18,7 @@ const UserSchema = new mongoose.Schema(
     profile_picture: {
       type: String,
     },
+    wishlists: [{ type: mongoose.Schema.Types.ObjectId, ref: "wishlist" }],
   },
   {
     timestamps: { createdAt: "created_at", updatedAt: "updated_at" },

@@ -4,6 +4,7 @@ const { check, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 
 const Wishlist = require("../models/Wishlist");
+const User = require("../models/User");
 
 // @route    POST /v1/wishlist
 // @desc     Create Wishlist
@@ -31,6 +32,11 @@ router.post(
       });
 
       await wishlist.save();
+
+      let user = await User.findById(req.user.id);
+      user.wishlists.push(wishlist);
+      await user.save();
+
       return res.status(200).json();
     } catch (err) {
       return res
@@ -54,7 +60,26 @@ router.delete("/v1/wishlist/:id", auth, async (req, res) => {
     await wishlist.remove();
 
     return res.status(200).json();
-  } catch (err) {}
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ errors: [{ msg: "Wishlist could not be deleted" }] });
+  }
+});
+
+// @route    GET /v1/wishlists
+// @desc     Get all Wishlist
+// @access   Private
+router.get("/v1/wishlists", auth, async (req, res) => {
+  try {
+    let wishlists = await Wishlist.find({ user: req.user.id });
+
+    return res.status(200).json(wishlists);
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ errors: [{ msg: "Wishlist could not be get" }] });
+  }
 });
 
 module.exports = router;
