@@ -22,7 +22,7 @@ router.post(
   ],
   async (req, res) => {
     try {
-      let trip = await Trip.findById(req.params.id);
+      let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
 
       if (!trip) {
         return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
@@ -48,11 +48,56 @@ router.post(
       trip.attractions.push(attraction);
       await trip.save();
 
-      return res.status(200).json();
+      return res.status(200).json(attraction);
     } catch (err) {
       return res
         .status(404)
         .json({ errors: [{ msg: "Attraction could not be added" }] });
+    }
+  }
+);
+
+// @route    POST /v1/trip/:id/attraction/:id
+// @desc     Delete Attraction
+// @access   Private
+router.delete(
+  "/v1/trip/:tripId/attraction/:attractionId",
+  auth,
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      let trip = await Trip.findOne({
+        _id: req.params.tripId,
+        user: req.user.id,
+      });
+
+      if (!trip) {
+        return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+      }
+
+      // Check whether attraction belongs to trip or not
+      if (!trip.attractions.includes(req.params.attractionId)) {
+        return res
+          .status(404)
+          .json({ errors: [{ msg: "Attraction not found" }] });
+      }
+
+      trip.attractions.pull(req.params.attractionId);
+      trip.save();
+
+      let attraction = await Attraction.findById(req.params.attractionId);
+      await attraction.remove();
+
+      return res.status(200).json();
+    } catch (err) {
+      console.log(err);
+      return res
+        .status(404)
+        .json({ errors: [{ msg: "Attraction could not be deleted" }] });
     }
   }
 );

@@ -59,6 +59,10 @@ router.delete("/v1/wishlist/:id", auth, async (req, res) => {
 
     await wishlist.remove();
 
+    let user = await User.findById(req.user.id);
+    user.wishlists.pull(wishlist);
+    await user.save();
+
     return res.status(200).json();
   } catch (err) {
     return res
