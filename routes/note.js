@@ -44,13 +44,39 @@ router.post(
       return res.status(201).json(note);
     } catch (err) {
       return res
-        .status(404)
+        .status(400)
         .json({ errors: [{ msg: "Note could not be added" }] });
     }
   }
 );
 
-// @route    PUT /v1/attraction/:id/note
+// @route    GET /v1/attraction/:attractionId/note/:noteId
+// @desc     Get note
+// @access   Private
+router.get(
+  "/v1/attraction/:attractionId/note/:noteId",
+  auth,
+  async (req, res) => {
+    try {
+      let note = await Note.findOne({
+        _id: req.params.noteId,
+        attraction: req.params.attractionId,
+      });
+
+      if (!note) {
+        return res.status(404).json({ errors: [{ msg: "Note not found" }] });
+      }
+
+      return res.status(200).json(note);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Note could not be get" }] });
+    }
+  }
+);
+
+// @route    PUT /v1/attraction/:attractionId/note/:noteId
 // @desc     Update note
 // @access   Private
 router.put(
