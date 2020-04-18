@@ -57,7 +57,83 @@ router.post(
   }
 );
 
-// @route    POST /v1/trip/:id/attraction/:id
+// @route    POST /v1/trip/:tripId/attraction/:attractionId
+// @desc     Update attraction
+// @access   Private
+router.put(
+  "/v1/trip/:tripId/attraction/:attractionId",
+  auth,
+  async (req, res) => {
+    try {
+      let trip = await Trip.findOne({
+        _id: req.params.tripId,
+        user: req.user.id,
+      });
+
+      if (!trip) {
+        return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+      }
+
+      // Check whether attraction belongs to trip or not
+      if (!trip.attractions.includes(req.params.attractionId)) {
+        return res
+          .status(404)
+          .json({ errors: [{ msg: "Attraction not found" }] });
+      }
+
+      let attraction = await Attraction.findById(req.params.attractionId);
+
+      const { start_time, duration, transport } = req.body;
+
+      if (start_time) {
+        if (!moment.unix(start_time).isValid()) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "Start time is not valid" }] });
+        }
+        attraction.start_time = moment.unix(start_time);
+      }
+
+      if (duration) {
+        if (isNaN(Number(duration))) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "Duration is not valid" }] });
+        }
+        attraction.duration = duration;
+      }
+
+      if (transport) {
+        const { mode, time } = transport;
+
+        if (!mode || !time) {
+          return res.status(400).json({
+            errors: [
+              { msg: "Transportation should contain both mode and time" },
+            ],
+          });
+        }
+
+        if (isNaN(Number(time))) {
+          return res
+            .status(400)
+            .json({ errors: [{ msg: "Transporation time is not valid" }] });
+        }
+        attraction.transport = transport;
+      }
+
+      await attraction.save();
+
+      return res.status(200).json(attraction);
+    } catch (err) {
+      return res
+        .status(404)
+        .json({ errors: [{ msg: "Attraction could not be updated" }] });
+    }
+  }
+);
+
+// @route    POST /v1/trip/:tripId/attraction/:attractionId
 // @desc     Delete Attraction
 // @access   Private
 router.delete(
