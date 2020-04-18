@@ -50,4 +50,39 @@ router.post(
   }
 );
 
+// @route    PUT /v1/attraction/:id/note
+// @desc     Update note
+// @access   Private
+router.put(
+  "/v1/attraction/:attractionId/note/:noteId",
+  auth,
+  [check("detail", "Note detail is required").not().isEmpty()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      let note = await Note.findOne({
+        _id: req.params.noteId,
+        attraction: req.params.attractionId,
+      });
+
+      if (!note) {
+        return res.status(404).json({ errors: [{ msg: "Note not found" }] });
+      }
+
+      note.detail = req.body.detail;
+
+      await note.save();
+
+      return res.status(200).json(note);
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Note could not be updated" }] });
+    }
+  }
+);
 module.exports = router;
