@@ -16,5 +16,6 @@ app.use("/", require("./routes/user"));
 app.use("/", require("./routes/trip"));
 app.use("/", require("./routes/wishlist"));
 app.use("/", require("./routes/attraction"));
+app.use("/", require("./routes/note"));
 
 module.exports = app;
