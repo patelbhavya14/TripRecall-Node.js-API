@@ -57,6 +57,32 @@ router.post(
   }
 );
 
+// @route    GET /v1/trip/:tripId/attractions
+// @desc     Get all attraction
+// @access   Private
+router.get("/v1/trip/:tripId/attractions", auth, async (req, res) => {
+  try {
+    let trip = await Trip.findOne({
+      _id: req.params.tripId,
+      user: req.user.id,
+    });
+
+    if (!trip) {
+      return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+    }
+
+    let attractions = await Attraction.find({ trip: req.params.tripId }).sort({
+      start_time: 1,
+    });
+
+    return res.status(200).json(attractions);
+  } catch (err) {
+    return res
+      .status(404)
+      .json({ errors: [{ msg: "Could not get attractions" }] });
+  }
+});
+
 // @route    POST /v1/trip/:tripId/attraction/:attractionId
 // @desc     Update attraction
 // @access   Private
