@@ -21,6 +21,11 @@ router.post(
       .withMessage("Start Date is not valid"),
   ],
   async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     try {
       let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
 
@@ -166,11 +171,6 @@ router.delete(
   "/v1/trip/:tripId/attraction/:attractionId",
   auth,
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
     try {
       let trip = await Trip.findOne({
         _id: req.params.tripId,

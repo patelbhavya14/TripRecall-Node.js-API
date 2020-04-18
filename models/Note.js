@@ -4,7 +4,7 @@ const NoteSchema = new mongoose.Schema(
   {
     attraction: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "trips",
+      ref: "attractions",
     },
     detail: {
       type: String,
