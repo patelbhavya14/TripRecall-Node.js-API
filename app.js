@@ -11,6 +11,11 @@ app.use(express.json({ extended: false }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// default route
+app.get("/", async (req, res) => {
+  return res.status(200).json({ msg: "TripRecall_API" });
+});
+
 // Define Routes
 app.use("/", require("./routes/user"));
 app.use("/", require("./routes/trip"));
