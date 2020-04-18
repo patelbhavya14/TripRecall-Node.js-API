@@ -22,6 +22,7 @@ const TripSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    attractions: [{ type: mongoose.Schema.Types.ObjectId, ref: "attraction" }],
   },
   {
     timestamps: { createdAt: "created_ts", updatedAt: "updated_ts" },

@@ -15,5 +15,6 @@ app.use(cors());
 app.use("/", require("./routes/user"));
 app.use("/", require("./routes/trip"));
 app.use("/", require("./routes/wishlist"));
+app.use("/", require("./routes/attraction"));
 
 module.exports = app;
