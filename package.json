@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/patelbhavya14/TripRecall-Node.js-API#readme",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-validator": "^6.4.0",
