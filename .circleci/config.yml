@@ -23,8 +23,53 @@ jobs:
       - run:
           name: Run unit test
           command: npm test
+  build:
+    working_directory: ~/webapp
+    filters:
+      branches:
+        only:
+          - master
+    docker:
+      - image: circleci/node:10.15.3
+      - image: circleci/python:2.7-stretch
+    steps:
+      - checkout
+      - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get install python-setuptools
+            sudo easy_install pip
+            sudo pip install awscli
+      - run:
+          name: Configure AWS default region
+          command: |
+            aws configure set region $AWS_REGION
+      - run:
+          name: Upload artifacts to S3 Bucket
+          command: |
+            aws deploy push \
+            --application-name csye6225-webapp \
+            --description "Deploying artifacts from S3 Bucket to EC2 instance" \
+            --ignore-hidden-files \
+            --s3-location s3://$CODEDEPLOY_BUCKET_NAME/webapp_$CIRCLE_BUILD_NUM.zip \
+            --source .
+      - run:
+          name: Deploy latest revision to EC2 instance
+          command: |
+            aws deploy create-deployment \
+            --application-name csye6225-webapp \
+            --deployment-group-name csye6225-webapp-deployment \
+            --s3-location bucket=$CODEDEPLOY_BUCKET_NAME,key=webapp_$CIRCLE_BUILD_NUM.zip,bundleType=zip \
+            --file-exists-behavior OVERWRITE
 workflows:
   version: 2
   pr-check:
     jobs:
       - pr_check
+  build_deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
