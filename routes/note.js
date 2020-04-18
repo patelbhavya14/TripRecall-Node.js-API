@@ -76,6 +76,40 @@ router.get(
   }
 );
 
+// @route    DELETE /v1/attraction/:attractionId/note/:noteId
+// @desc     Delete note
+// @access   Private
+router.delete(
+  "/v1/attraction/:attractionId/note/:noteId",
+  auth,
+  async (req, res) => {
+    try {
+      let note = await Note.findOne({
+        _id: req.params.noteId,
+        attraction: req.params.attractionId,
+      });
+
+      if (!note) {
+        return res.status(404).json({ errors: [{ msg: "Note not found" }] });
+      }
+
+      await note.remove();
+
+      let attraction = await Attraction.findById(req.params.attractionId);
+
+      attraction.note = undefined;
+
+      await attraction.save();
+
+      return res.status(200).json();
+    } catch (err) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Note could not be deleted" }] });
+    }
+  }
+);
+
 // @route    PUT /v1/attraction/:attractionId/note/:noteId
 // @desc     Update note
 // @access   Private
