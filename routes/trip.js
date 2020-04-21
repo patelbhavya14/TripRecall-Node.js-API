@@ -54,7 +54,9 @@ router.post(
     if (available.length > 0) {
       return res
         .status(400)
-        .json({ msg: "Your trip is conflicting with one of your trips" });
+        .json({
+          errors: [{ msg: "Your trip is conflicting with one of your trips" }],
+        });
     }
 
     try {
