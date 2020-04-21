@@ -52,11 +52,9 @@ router.post(
     });
 
     if (available.length > 0) {
-      return res
-        .status(400)
-        .json({
-          errors: [{ msg: "Your trip is conflicting with one of your trips" }],
-        });
+      return res.status(400).json({
+        errors: [{ msg: "Your trip is conflicting with one of your trips" }],
+      });
     }
 
     try {
@@ -83,7 +81,10 @@ router.post(
 // @access   Private
 router.get("/v1/trips", auth, async (req, res) => {
   try {
-    let trips = await Trip.find({ user: req.user.id });
+    let trips = await Trip.find({ user: req.user.id })
+      .populate("attractions")
+      .exec();
+
     return res.status(200).json(trips);
   } catch (err) {
     return res.status(400).json({ errors: [{ msg: "Bad request" }] });
