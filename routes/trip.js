@@ -82,8 +82,10 @@ router.post(
 router.get("/v1/trips", auth, async (req, res) => {
   try {
     let trips = await Trip.find({ user: req.user.id })
-      .select("-note")
-      .populate("attractions")
+      .populate({
+        path: "attractions",
+        select: "-note",
+      })
       .exec();
 
     return res.status(200).json(trips);
