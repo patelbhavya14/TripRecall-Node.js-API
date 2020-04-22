@@ -76,9 +76,11 @@ router.get("/v1/trip/:tripId/attractions", auth, async (req, res) => {
       return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
     }
 
-    let attractions = await Attraction.find({ trip: req.params.tripId }).sort({
-      start_time: 1,
-    });
+    let attractions = await Attraction.find({ trip: req.params.tripId })
+      .sort({
+        start_time: 1,
+      })
+      .select("-note");
 
     return res.status(200).json(attractions);
   } catch (err) {
@@ -112,7 +114,9 @@ router.put(
           .json({ errors: [{ msg: "Attraction not found" }] });
       }
 
-      let attraction = await Attraction.findById(req.params.attractionId);
+      let attraction = await Attraction.findById(
+        req.params.attractionId
+      ).select("-note");
 
       const { start_time, duration, transport } = req.body;
 
