@@ -50,31 +50,24 @@ router.post(
   }
 );
 
-// @route    GET /v1/attraction/:attractionId/note/:noteId
+// @route    GET /v1/attraction/:attractionId/note
 // @desc     Get note
 // @access   Private
-router.get(
-  "/v1/attraction/:attractionId/note/:noteId",
-  auth,
-  async (req, res) => {
-    try {
-      let note = await Note.findOne({
-        _id: req.params.noteId,
-        attraction: req.params.attractionId,
-      });
+router.get("/v1/attraction/:attractionId/note", auth, async (req, res) => {
+  try {
+    let note = await Note.findOne({
+      attraction: req.params.attractionId,
+    });
 
-      if (!note) {
-        return res.status(404).json({ errors: [{ msg: "Note not found" }] });
-      }
-
-      return res.status(200).json(note);
-    } catch (err) {
-      return res
-        .status(400)
-        .json({ errors: [{ msg: "Note could not be get" }] });
+    if (!note) {
+      return res.status(404).json({ errors: [{ msg: "Note not found" }] });
     }
+
+    return res.status(200).json(note);
+  } catch (err) {
+    return res.status(400).json({ errors: [{ msg: "Note could not be get" }] });
   }
-);
+});
 
 // @route    DELETE /v1/attraction/:attractionId/note/:noteId
 // @desc     Delete note
