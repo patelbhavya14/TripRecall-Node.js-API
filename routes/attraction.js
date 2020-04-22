@@ -112,7 +112,9 @@ router.put(
           .json({ errors: [{ msg: "Attraction not found" }] });
       }
 
-      let attraction = await Attraction.findById(req.params.attractionId);
+      let attraction = await Attraction.findById(
+        req.params.attractionId
+      ).select("-note");
 
       const { start_time, duration, transport } = req.body;
 
