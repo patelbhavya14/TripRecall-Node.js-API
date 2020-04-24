@@ -37,7 +37,7 @@ router.post(
       user.wishlists.push(wishlist);
       await user.save();
 
-      return res.status(200).json();
+      return res.status(200).json(wishlist);
     } catch (err) {
       return res
         .status(400)
