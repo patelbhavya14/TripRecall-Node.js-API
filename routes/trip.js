@@ -276,7 +276,7 @@ router.post("/v1/trip/:id/photo", auth, async (req, res) => {
     let fileName = photo._id + "." + extension;
 
     let params = {
-      Bucket: "triprecall",
+      Bucket: process.env.S3_BUCKET_NAME,
       Body: fs.createReadStream(photoAttachment.tempFilePath),
       Key: dir + "/" + fileName,
     };
