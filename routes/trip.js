@@ -4,6 +4,11 @@ const { check, validationResult } = require("express-validator");
 const auth = require("../middleware/auth");
 const moment = require("moment");
 const Trip = require("../models/Trip");
+const Photo = require("../models/Photo");
+const mime = require("mime-types");
+const AWS = require("aws-sdk");
+const s3 = new AWS.S3();
+const fs = require("fs");
 
 // @route    POST /v1/trip
 // @desc     Create Trip
@@ -86,6 +91,7 @@ router.get("/v1/trips", auth, async (req, res) => {
         path: "attractions",
         select: "-note",
       })
+      .populate("photos")
       .exec();
 
     return res.status(200).json(trips);
@@ -99,7 +105,10 @@ router.get("/v1/trips", auth, async (req, res) => {
 // @access   Private
 router.get("/v1/trip/:id", auth, async (req, res) => {
   try {
-    let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
+    let trip = await Trip.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    }).populate("photos");
 
     if (!trip) {
       return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
@@ -220,5 +229,84 @@ router.put(
     }
   }
 );
+
+// @route    POST /v1/trip/:id/photo
+// @desc     Upload a photo of trip
+// @access   Private
+router.post("/v1/trip/:id/photo", auth, async (req, res) => {
+  try {
+    let trip = await Trip.findOne({ _id: req.params.id, user: req.user.id });
+
+    if (!trip) {
+      return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+    }
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "No files were uploaded." }] });
+    }
+
+    let photoAttachment = req.files.photo;
+
+    if (!photoAttachment) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "No files found in request" }] });
+    }
+
+    let extension = mime.extension(photoAttachment.mimetype);
+    if (
+      extension !== "png" &&
+      extension !== "jpg" &&
+      extension !== "jpeg" &&
+      extension !== "pdf"
+    ) {
+      return res
+        .status(400)
+        .json({ errors: [{ msg: "Unsupported file format" }] });
+    }
+
+    let dir = "triprecall/trip/" + req.params.id;
+
+    let photo = Photo({
+      trip: req.params.id,
+    });
+
+    let fileName = photo._id + "." + extension;
+
+    let params = {
+      Bucket: "triprecall",
+      Body: fs.createReadStream(photoAttachment.tempFilePath),
+      Key: dir + "/" + fileName,
+    };
+
+    photo.url = dir + "/" + fileName;
+
+    // Upload file to S3 bucket
+    s3.upload(params, async (err, data) => {
+      //handle error
+      if (err) {
+        return res
+          .status(500)
+          .send({ errors: [{ msg: "Photo could not be uploaded" }] });
+      }
+
+      // File uploaded
+      if (data) {
+        await photo.save();
+
+        trip.photos.push(photo._id);
+
+        await trip.save();
+
+        return res.status(201).json(photo);
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(404).json({ errors: [{ msg: "Trip not found" }] });
+  }
+});
 
 module.exports = router;
