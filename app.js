@@ -2,9 +2,17 @@ const express = require("express");
 const app = express();
 const connectDB = require("./config/db");
 const cors = require("cors");
+const fileUpload = require("express-fileupload");
 
 // Connect Database
 connectDB();
+
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 
 // Init Middleware
 app.use(express.json({ extended: false }));
